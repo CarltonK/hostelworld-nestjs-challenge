@@ -8,13 +8,13 @@ This is a **NestJS** application starter with MongoDB integration. If necessary,
 ### Install dependencies:
 
 ```bash
-$ npm install
+$ pnpm install
 ````
 
 ### Docker for MongoDB Emulator
 To use the MongoDB Emulator, you can start it using Docker:
 ```
-npm run mongo:start
+pnpm run mongo:start
 ```
 This will start a MongoDB instance running on your local machine. You can customize the settings in the Docker setup by modifying the docker-compose-mongo.yml if necessary. In the current configuration, you will have a MongoDB container running, which is accessible at localhost:27017.
 This mongo url will be necessary on the .env file, with example as follows:
@@ -30,7 +30,7 @@ The data.json file contains example records to seed your database. The setup scr
 To set up the database with the example records:
 
 ```
-npm run setup:db
+pnpm run setup:db
 ```
 This will prompt the user to cleanup (Y/N) existing collection before importing data.json
 
@@ -65,13 +65,13 @@ Here’s an example of the data.json file that contains records:
 To run the application in development mode (with hot reloading):
 
 ```
-npm run start:dev
+pnpm run start:dev
 ```
 #### Production Mode
 To build and run the app in production mode:
 
 ```
-npm run start:prod
+pnpm run start:prod
 ```
 
 ### Tests
@@ -79,18 +79,18 @@ npm run start:prod
 To run unit tests:
 
 ```
-npm run test
+pnpm run test
 ```
 To run unit tests with code coverage:
 
 ```
-npm run test:cov
+pnpm run test:cov
 ```
 This will show you how much of your code is covered by the unit tests.
 #### Run End-to-End Tests
 To run end-to-end tests:
 ```
-npm run test:e2e
+pnpm run test:e2e
 ```
 Run Tests with Coverage
 
@@ -99,7 +99,7 @@ Run Linting
 To check if your code passes ESLint checks:
 
 ```
-npm run lint
+pnpm run lint
 ```
 This command will show you any linting issues with your code.
 
