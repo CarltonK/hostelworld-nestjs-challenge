@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Record } from '../schemas/record.schema';
@@ -56,40 +60,46 @@ export class RecordService {
   }
 
   async findAll(filterOpts: RecordFilterOpts) {
-    const allRecords = await this.recordModel.find().exec();
+    const { album, q, format, category, artist, page, limit } = filterOpts;
 
-    const { album, q, format, category, artist } = filterOpts;
+    // Base filter query
+    const query: FilterQuery<Record> = {};
+    const insensitive = { $options: 'i' };
 
-    const filteredRecords = allRecords.filter((record) => {
-      let match = true;
+    if (q) {
+      query.$or = [
+        { artist: { $regex: q, ...insensitive } },
+        { album: { $regex: q, ...insensitive } },
+        { category: { $regex: q, ...insensitive } },
+        { format: { $regex: q, ...insensitive } },
+      ];
+    }
 
-      if (q) {
-        match =
-          match &&
-          (record.artist.includes(q) ||
-            record.album.includes(q) ||
-            record.category.includes(q));
-      }
+    // Field-specific filters
+    if (artist) {
+      query.artist = { $regex: artist, ...insensitive };
+    }
 
-      if (artist) {
-        match = match && record.artist.includes(artist);
-      }
+    if (album) {
+      query.album = { $regex: album, ...insensitive };
+    }
 
-      if (album) {
-        match = match && record.album.includes(album);
-      }
+    // Exact match filters - Enum based
+    if (format) {
+      query.format = format;
+    }
 
-      if (format) {
-        match = match && record.format === format;
-      }
+    if (category) {
+      query.category = category;
+    }
 
-      if (category) {
-        match = match && record.category === category;
-      }
+    // Pagination
+    const skip = (page - 1) * limit;
 
-      return match;
-    });
-
-    return filteredRecords;
+    try {
+      return this.recordModel.find(query).skip(skip).limit(limit).exec();
+    } catch (error) {
+      throw new NotFoundException(error?.message);
+    }
   }
 }
