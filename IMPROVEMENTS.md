@@ -65,3 +65,19 @@ Replaced npm with pnpm across the entire project to improve installation speed, 
 
 ## Other Enhancements
 
+### [2025-11-22] Introduced NestJS Config Module
+**Description**  
+Added the NestJS Config Module to replace the previous AppConfig setup and enable runtime validation of environment variables.
+
+**Motivation**  
+- Validate environment variables at startup  
+- Centralize and simplify configuration management
+
+**Technical Changes**  
+- Added `ConfigModule.forRoot` with Joi validation  
+- Removed old AppConfig usage  
+- Updated `MongooseModule.forRootAsync` to use `ConfigService`
+
+**Impact**  
+- Safer startup through validated env vars  
+- Cleaner and more maintainable config structure
