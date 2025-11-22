@@ -45,6 +45,20 @@ Replaced npm with pnpm across the entire project to improve installation speed, 
 
 ## Architecture
 
+### [2025-11-22] Migrated to Record Module
+**Description**  
+Refactored the project structure by isolating all record-related logic into a dedicated `RecordModule` for better organization and separation of concerns.
+
+**Motivation**  
+- Improve code structure and maintainability.
+- Group related controllers, services and schemas in one module.
+
+**Technical Changes**  
+- Created `RecordModule` containing the record controller, service and schemas.
+- Moved record-related files into the new module structure.
+
+**Impact**  
+- Clearer feature boundaries.
 
 ---
 
@@ -70,14 +84,14 @@ Replaced npm with pnpm across the entire project to improve installation speed, 
 Added the NestJS Config Module to replace the previous AppConfig setup and enable runtime validation of environment variables.
 
 **Motivation**  
-- Validate environment variables at startup  
-- Centralize and simplify configuration management
+- Validate environment variables at startup.
+- Centralize and simplify configuration management.
 
 **Technical Changes**  
-- Added `ConfigModule.forRoot` with Joi validation  
-- Removed old AppConfig usage  
-- Updated `MongooseModule.forRootAsync` to use `ConfigService`
+- Added `ConfigModule.forRoot` with Joi validation.
+- Removed old AppConfig usage.
+- Updated `MongooseModule.forRootAsync` to use `ConfigService`.
 
 **Impact**  
-- Safer startup through validated env vars  
-- Cleaner and more maintainable config structure
+- Safer startup through validated env vars.
+- Cleaner and more maintainable config structure.
