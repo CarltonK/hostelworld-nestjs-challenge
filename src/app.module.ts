@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { RecordModule } from './api/record.module';
+import { RecordModule } from './record/record.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config, { validationSchema } from './utils/config';

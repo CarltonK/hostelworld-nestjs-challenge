@@ -1,8 +1,9 @@
 import * as mongoose from 'mongoose';
-import { Record, RecordSchema } from './src/api/schemas/record.schema';
+import { Record, RecordSchema } from './src/record/schemas/record.schema';
 import * as fs from 'fs';
 import config from './src/utils/config';
 import * as readline from 'readline';
+import 'dotenv/config';
 
 async function setupDatabase() {
   try {
