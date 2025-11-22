@@ -1,11 +1,19 @@
 import * as mongoose from 'mongoose';
 import { Record, RecordSchema } from './src/api/schemas/record.schema';
 import * as fs from 'fs';
-import { AppConfig } from './src/app.config';
+import config from './src/utils/config';
 import * as readline from 'readline';
 
 async function setupDatabase() {
   try {
+    // Load config manually
+    const appConfig = config();
+    const mongoUrl = appConfig.MONGO_URL;
+
+    if (!mongoUrl) {
+      throw new Error('MONGO_URL not found in environment variables.');
+    }
+
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -22,7 +30,7 @@ async function setupDatabase() {
           RecordSchema,
         );
 
-        await mongoose.connect(AppConfig.mongoUrl);
+        await mongoose.connect(mongoUrl);
 
         if (answer.toLowerCase() === 'y') {
           await recordModel.deleteMany({});
