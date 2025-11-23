@@ -107,6 +107,28 @@ Enhanced the records search endpoint by introducing MongoDB indexing, text searc
 - Lower database load due to Redis caching
 - Improved scalability and responsiveness across all record queries
 
+### [2025-11-23] MusicBrainz Integration & Tracklist Enrichment
+**Description:**
+Integrated automatic metadata enrichment using the MusicBrainz API, enabling tracklist retrieval when creating or updating records with a valid MBID. Added XML parsing and schema updates to support enriched metadata.
+
+**Motivation:**
+- Automatically populate tracklists to avoid manual entry
+- Enrich records with high-quality external metadata
+- Improve the accuracy and consistency of stored music data
+
+**Technical Changes:**  
+- Added tracklist field to the Record schema and update DTOs
+- Implemented MusicBrainzService with XML fetching, XML parsing and a 5-day Redis cache
+- Updated create and update flows to fetch tracklists when MBID is provided or changed
+- Improved error handling for invalid or missing MBIDs
+- Added enrichment logic to extract position, title, duration
+
+**Impact:**
+- More complete and useful record entries with automatically generated tracklists
+- Reduced external API calls due to Redis caching - Especially to MusicBrainz API which has some limitas
+- Faster and more accurate record creation and updates
+- Better data consistency across all records
+
 ---
 
 ## Testing

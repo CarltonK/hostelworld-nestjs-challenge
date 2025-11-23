@@ -6,9 +6,11 @@ import {
   IsInt,
   IsEnum,
   IsOptional,
+  IsArray,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { RecordFormat, RecordCategory } from '../schemas/record.enum';
+import { TrackItemDTO } from './track-item.dto';
 
 export class UpdateRecordRequestDTO {
   @ApiProperty({
@@ -83,4 +85,13 @@ export class UpdateRecordRequestDTO {
   })
   @IsOptional()
   mbid?: string;
+
+  @ApiProperty({
+    description: 'List of track details fetched from MusicBrainz',
+    type: [TrackItemDTO],
+    required: false,
+  })
+  @IsArray()
+  @IsOptional()
+  tracklist?: TrackItemDTO[];
 }

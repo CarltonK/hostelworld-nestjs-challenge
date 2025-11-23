@@ -4,6 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config, { validationSchema } from './utils/config';
 import { CacheModule } from './cache/cache.module';
+import { MusicBrainzModule } from './music-brainz/music-brainz.module';
+import { LoggerModule } from './logger/logger.module';
+import { XmlModule } from './xml/xml.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { CacheModule } from './cache/cache.module';
     }),
     RecordModule,
     CacheModule,
+    MusicBrainzModule,
+    LoggerModule,
+    XmlModule,
   ],
   controllers: [],
   providers: [],

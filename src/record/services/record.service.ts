@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -11,6 +12,9 @@ import { CreateRecordRequestDTO } from '../dtos/create-record.request.dto';
 import { UpdateRecordRequestDTO } from '../dtos/update-record.request.dto';
 import Redis from 'ioredis';
 import { REDIS_CLIENT } from './../../cache/cache.module';
+import { MusicBrainzService } from './../../music-brainz/music-brainz.service';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 export type RecordFilterOpts = {
   page?: number;
@@ -22,11 +26,36 @@ export class RecordService {
   constructor(
     @InjectModel('Record') private readonly recordModel: Model<Record>,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
-  ) { }
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    @Inject(MusicBrainzService)
+    private readonly musicBrainzService: MusicBrainzService,
+  ) {}
 
   async create(request: CreateRecordRequestDTO) {
+    /*
+     * Tested by adding one of my favorite albums by one of my favorite rock band - Bowling For Soup
+     * https://musicbrainz.org/release/d9d6d2d0-8552-4c12-982d-49cc6a4d7a7e
+     */
+    let tracklist = [];
+
+    if (request.mbid) {
+      try {
+        const release = await this.musicBrainzService.getReleaseByMBID(
+          request.mbid,
+        );
+        tracklist = release.tracklist;
+      } catch (error) {
+        this.logger.error(
+          `Failed to fetch MusicBrainz data for MBID ${request.mbid}: ${error?.message}`,
+        );
+        this.logger.warn(
+          `Proceeding without tracklist for MBID ${request.mbid}`,
+        );
+      }
+    }
+
     try {
-      await this.recordModel.create({
+      const created = await this.recordModel.create({
         artist: request.artist,
         album: request.album,
         price: request.price,
@@ -34,9 +63,13 @@ export class RecordService {
         format: request.format,
         category: request.category,
         mbid: request.mbid,
+        tracklist,
       });
+      return created;
     } catch (error) {
-      throw new InternalServerErrorException(error?.message);
+      const errMsg = 'Failed to create record';
+      this.logger.error(`${errMsg}: ${error?.message}`);
+      throw new InternalServerErrorException(errMsg);
     }
   }
 
@@ -47,17 +80,39 @@ export class RecordService {
     try {
       const record = await this.recordModel.findById(id);
       if (!record) {
-        throw new InternalServerErrorException('Record not found');
+        throw new NotFoundException('Record not found');
       }
 
-      Object.assign(record, updateRecordDto);
+      // Fetch data from MusicBrainz IFF mbid changed
+      if (updateRecordDto.mbid && updateRecordDto.mbid !== record.mbid) {
+        try {
+          const release = await this.musicBrainzService.getReleaseByMBID(
+            updateRecordDto.mbid,
+          );
 
-      const updated = await this.recordModel.updateOne(record);
+          updateRecordDto.tracklist = release.tracklist;
+        } catch (err) {
+          this.logger.error('Failed to fetch MusicBrainz data', err);
+          throw new BadRequestException(
+            'Invalid MBID or MusicBrainz lookup error',
+          );
+        }
+      }
+
+      const updated = await this.recordModel.findByIdAndUpdate(
+        id,
+        updateRecordDto,
+        {
+          new: true, // Updated doc
+          runValidators: true, // Schema validation
+        },
+      );
+
       if (!updated) {
         throw new InternalServerErrorException('Failed to update record');
       }
 
-      return record;
+      return updated;
     } catch (error) {
       throw new InternalServerErrorException(error?.message);
     }
