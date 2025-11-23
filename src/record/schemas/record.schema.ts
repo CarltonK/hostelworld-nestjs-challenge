@@ -4,23 +4,23 @@ import { RecordFormat, RecordCategory } from './record.enum';
 
 @Schema({ timestamps: true })
 export class Record extends Document {
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   artist: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   album: string;
+
+  @Prop({ enum: RecordFormat, required: true, index: true })
+  format: RecordFormat;
+
+  @Prop({ enum: RecordCategory, required: true, index: true })
+  category: RecordCategory;
 
   @Prop({ required: true })
   price: number;
 
   @Prop({ required: true })
   qty: number;
-
-  @Prop({ enum: RecordFormat, required: true })
-  format: RecordFormat;
-
-  @Prop({ enum: RecordCategory, required: true })
-  category: RecordCategory;
 
   @Prop({ default: Date.now })
   created: Date;
@@ -33,3 +33,14 @@ export class Record extends Document {
 }
 
 export const RecordSchema = SchemaFactory.createForClass(Record);
+
+// Text Search Index
+RecordSchema.index({
+  artist: 'text',
+  album: 'text',
+  format: 'text',
+  category: 'text',
+});
+
+// Unique Compound Index
+RecordSchema.index({ artist: 1, album: 1, format: 1 }, { unique: true });

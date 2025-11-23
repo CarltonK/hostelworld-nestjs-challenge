@@ -1,4 +1,5 @@
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -8,6 +9,8 @@ import { FilterQuery, Model } from 'mongoose';
 import { Record } from '../schemas/record.schema';
 import { CreateRecordRequestDTO } from '../dtos/create-record.request.dto';
 import { UpdateRecordRequestDTO } from '../dtos/update-record.request.dto';
+import Redis from 'ioredis';
+import { REDIS_CLIENT } from './../../cache/cache.module';
 
 export type RecordFilterOpts = {
   page?: number;
@@ -18,7 +21,8 @@ export type RecordFilterOpts = {
 export class RecordService {
   constructor(
     @InjectModel('Record') private readonly recordModel: Model<Record>,
-  ) {}
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
+  ) { }
 
   async create(request: CreateRecordRequestDTO) {
     try {
@@ -62,42 +66,52 @@ export class RecordService {
   async findAll(filterOpts: RecordFilterOpts) {
     const { album, q, format, category, artist, page, limit } = filterOpts;
 
+    // Cache first before resorting to DB
+    const cacheKey = `records:${JSON.stringify(filterOpts)}`;
+
+    const cached = await this.redis.get(cacheKey);
+    if (cached) return JSON.parse(cached);
+
     // Base filter query
     const query: FilterQuery<Record> = {};
     const insensitive = { $options: 'i' };
 
-    if (q) {
-      query.$or = [
-        { artist: { $regex: q, ...insensitive } },
-        { album: { $regex: q, ...insensitive } },
-        { category: { $regex: q, ...insensitive } },
-        { format: { $regex: q, ...insensitive } },
-      ];
-    }
+    // Text search over regex search to improve performance in bigger data sets
+    if (q) query.$text = { $search: q };
 
     // Field-specific filters
-    if (artist) {
-      query.artist = { $regex: artist, ...insensitive };
-    }
-
-    if (album) {
-      query.album = { $regex: album, ...insensitive };
-    }
+    if (artist) query.artist = { $regex: artist, ...insensitive };
+    if (album) query.album = { $regex: album, ...insensitive };
 
     // Exact match filters - Enum based
-    if (format) {
-      query.format = format;
-    }
-
-    if (category) {
-      query.category = category;
-    }
+    if (format) query.format = format;
+    if (category) query.category = category;
 
     // Pagination
     const skip = (page - 1) * limit;
 
     try {
-      return this.recordModel.find(query).skip(skip).limit(limit).exec();
+      const [records, total] = await Promise.all([
+        this.recordModel.find(query).skip(skip).limit(limit).exec(),
+        this.recordModel.countDocuments(query),
+      ]);
+
+      const response = {
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+          hasNextPage: page * limit < total,
+          hasPrevPage: page > 1,
+        },
+        data: records,
+      };
+
+      // Cache response for next time
+      await this.redis.set(cacheKey, JSON.stringify(response), 'PX', 30000);
+
+      return response;
     } catch (error) {
       throw new NotFoundException(error?.message);
     }

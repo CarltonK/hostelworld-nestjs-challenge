@@ -3,6 +3,7 @@ import { RecordModule } from './record/record.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config, { validationSchema } from './utils/config';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import config, { validationSchema } from './utils/config';
       inject: [ConfigService],
     }),
     RecordModule,
+    CacheModule,
   ],
   controllers: [],
   providers: [],

@@ -64,6 +64,48 @@ Refactored the project structure by isolating all record-related logic into a de
 
 ## Features
 
+### [2025-11-22] Added Pagination Support to Record Listing
+
+**Description:**  
+Introduced pagination to the `findAll` records endpoint, allowing clients to fetch data in smaller, controlled chunks rather than retrieving the entire dataset at once.
+
+**Motivation:**  
+- Improve API performance when handling large datasets.
+- Reduce MongoDB load by limiting returned documents.
+- Provide predictable and efficient client-side navigation through results.
+
+**Technical Changes:**  
+- Added `page` and `limit` parameters to `RecordFilterOpts`.
+- Implemented skip/limit logic: `skip = (page - 1) * limit`.
+- Updated `findAll` query to apply `.skip(skip).limit(limit)`.
+- Ensured pagination works seamlessly with all existing filters.
+
+**Impact:**  
+- Faster response times for large collections.
+- Improved scalability and user experience when browsing records.
+
+### [2025-11-23] Improving search performance
+**Description:**
+Enhanced the records search endpoint by introducing MongoDB indexing, text search and Redis caching to significantly improve performance on large datasets.
+
+**Resources:**
+- [Indexing in Mongoose](https://medium.com/@mansouriyoussef1991/a-comprehensive-guide-to-indexing-in-mongoose-%EF%B8%8F-dcdbd394a320)
+
+**Motivation:**
+- Improve search speed for large collections
+- Replace regex-based search with MongoDB text search
+- Reduce server workload with caching
+
+**Technical Changes:**  
+- Added single-field indexes, compound indexes and a text index (`artist`, `album`, `format`, `category`)  
+- Reworked search logic to use `$text: { $search: q }`
+- Added Redis caching using the integrated Redis client
+- Updated return DTO to include typed pagination metadata and records list
+
+**Impact:**
+- Faster and more efficient search queries  
+- Lower database load due to Redis caching
+- Improved scalability and responsiveness across all record queries
 
 ---
 

@@ -7,6 +7,7 @@ import { CreateRecordRequestDTO } from '../dtos/create-record.request.dto';
 import { UpdateRecordRequestDTO } from '../dtos/update-record.request.dto';
 import { RecordService } from '../services/record.service';
 import { RecordFilterDto } from '../dtos/filter-record.dto';
+import { RecordListResponseDto } from '../dtos/paginated-response.dto';
 
 @Controller('records')
 export class RecordController {
@@ -38,10 +39,10 @@ export class RecordController {
   @ApiOperation({ summary: 'Get all records with optional filters' })
   @ApiResponse({
     status: 200,
-    description: 'List of records',
-    type: [Record],
+    description: 'List of paginated records',
+    type: RecordListResponseDto,
   })
-  async findAll(@Query() filter: RecordFilterDto): Promise<Record[]> {
+  async findAll(@Query() filter: RecordFilterDto): Promise<RecordListResponseDto> {
     return await this.recordService.findAll(filter);
   }
 }
