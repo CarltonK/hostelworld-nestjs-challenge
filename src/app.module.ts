@@ -7,6 +7,7 @@ import { CacheModule } from './cache/cache.module';
 import { MusicBrainzModule } from './music-brainz/music-brainz.module';
 import { LoggerModule } from './logger/logger.module';
 import { XmlModule } from './xml/xml.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { XmlModule } from './xml/xml.module';
     MusicBrainzModule,
     LoggerModule,
     XmlModule,
+    OrdersModule,
   ],
   controllers: [],
   providers: [],
