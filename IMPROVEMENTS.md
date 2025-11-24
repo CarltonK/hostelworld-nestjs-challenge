@@ -65,7 +65,6 @@ Refactored the project structure by isolating all record-related logic into a de
 ## Features
 
 ### [2025-11-22] Added Pagination Support to Record Listing
-
 **Description:**  
 Introduced pagination to the `findAll` records endpoint, allowing clients to fetch data in smaller, controlled chunks rather than retrieving the entire dataset at once.
 
@@ -128,6 +127,22 @@ Integrated automatic metadata enrichment using the MusicBrainz API, enabling tra
 - Reduced external API calls due to Redis caching - Especially to MusicBrainz API which has some limitas
 - Faster and more accurate record creation and updates
 - Better data consistency across all records
+
+### [2025-11-24] Order Creation with Stock Management
+**Description:**
+Implemented the ability to create orders linked to records, including stock deduction and pricing calculation.
+
+**Motivation:**
+- Enable users to place orders for available records
+- Prevent overselling by validating and deducting stock atomically
+
+**Technical Changes:**  
+- Added Order module including schema, service, controller
+- Ensured atomic updates using session.withTransaction()
+
+**Impact:**
+- Safe and atomic record stock updates without race conditions
+- Prevents invalid orders (e.g., out-of-stock, invalid IDs)
 
 ---
 
