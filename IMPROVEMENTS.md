@@ -148,6 +148,26 @@ Implemented the ability to create orders linked to records, including stock dedu
 
 ## Testing
 
+### [2025-11-25] Implemented Tests
+**Description:**
+Implemented automated unit tests for all services to ensure correct behavior, error handling and data integrity.
+
+**Motivation:**  
+- Ensure services behave as expected under valid and invalid inputs
+- Prevent regressions in critical business logic like stock management and caching
+- Verify robust error handling for external dependencies (e.g., Redis, MusicBrainz API, database)
+
+**Technical Changes:**  
+- Used Jest for unit testing across all services  
+- Mocked external dependencies such as Redis, Axios, and Mongoose models  
+- Verified proper handling of valid inputs, invalid inputs, missing data, and exceptional cases  
+- Ensured key business logic is correctly executed
+
+**Impact:**  
+- Increases confidence in service reliability and correctness  
+- Prevents regressions during future development  
+- Validates error handling and ensures safe interactions with external systems and databases  
+- Supports maintainable and testable codebase across the project
 
 ---
 
