@@ -169,6 +169,32 @@ Implemented automated unit tests for all services to ensure correct behavior, er
 - Validates error handling and ensures safe interactions with external systems and databases  
 - Supports maintainable and testable codebase across the project
 
+### [2025-11-25] Implemented SonarQube Static Code Analysis
+**Description:**
+Integrated SonarQube for automated static code analysis to ensure code quality, maintainability, and adherence to coding standards across the project.
+
+**Resources:**
+- [Sonar Scanner](https://docs.sonarsource.com/sonarqube-server/9.9/analyzing-source-code/scanners/sonarscanner#sonarscanner-from-docker-image)
+- [Setup SonarScanner for NestJS](https://gist.github.com/tsabunkar/68bde97f226f8a1640b3ce66c4cf6f73)
+- [DockerHub](https://hub.docker.com/_/sonarqube)
+
+**Motivation:**  
+- Identify and fix code smells, bugs, and security vulnerabilities early
+- Enforce coding standards and maintain a consistent code style
+- Improve maintainability and reduce technical debt
+
+**Technical Changes:**  
+- Installed and configured SonarQube server and SonarScanner for project analysis
+- Configured project quality gates, rules, and metrics for coverage, code duplication, complexity, and security
+- Enabled reporting for issues, code smells, and vulnerabilities
+- Verified analysis results and remediated critical issues detected by SonarQube
+
+**Impact:**  
+- Ensures early detection of bugs, code smells, and potential security issues
+- Improves overall code quality and maintainability
+- Provides actionable metrics and dashboards for the development team
+- Supports long-term project scalability and reduces technical debt
+
 ---
 
 ## Infrastructure
