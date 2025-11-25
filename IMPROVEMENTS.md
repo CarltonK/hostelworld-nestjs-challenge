@@ -177,6 +177,7 @@ Integrated SonarQube for automated static code analysis to ensure code quality, 
 - [Sonar Scanner](https://docs.sonarsource.com/sonarqube-server/9.9/analyzing-source-code/scanners/sonarscanner#sonarscanner-from-docker-image)
 - [Setup SonarScanner for NestJS](https://gist.github.com/tsabunkar/68bde97f226f8a1640b3ce66c4cf6f73)
 - [DockerHub](https://hub.docker.com/_/sonarqube)
+- [Running SonarQube with Docker](https://medium.com/@rithery/setting-up-and-running-sonarqube-with-docker-for-a-nestjs-application-in-server-7dbbdfdb198c)
 
 **Motivation:**  
 - Identify and fix code smells, bugs, and security vulnerabilities early
