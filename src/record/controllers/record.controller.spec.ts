@@ -1,80 +1,104 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RecordController } from './record.controller';
-import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Record } from '../schemas/record.schema';
 import { CreateRecordRequestDTO } from '../dtos/create-record.request.dto';
 import { RecordCategory, RecordFormat } from '../schemas/record.enum';
+import { RecordService } from '../services/record.service';
+import { UpdateRecordRequestDTO } from '../dtos/update-record.request.dto';
+import { RecordListResponseDto } from '../dtos/paginated-response.dto';
 
 describe('RecordController', () => {
   let recordController: RecordController;
-  let recordModel: Model<Record>;
+  let service: RecordService;
+
+  const mockRecordService = {
+    create: jest.fn(),
+    fetchByIdAndUpdate: jest.fn(),
+    findAll: jest.fn(),
+  };
+
+  const resultId = '6925efa24d9d189640cd394f';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RecordController],
       providers: [
         {
-          provide: getModelToken('Record'),
-          useValue: {
-            new: jest.fn().mockResolvedValue({}),
-            constructor: jest.fn().mockResolvedValue({}),
-            find: jest.fn(),
-            findById: jest.fn(),
-            save: jest.fn(),
-            create: jest.fn(),
-          },
+          provide: RecordService,
+          useValue: mockRecordService,
         },
       ],
     }).compile();
 
     recordController = module.get<RecordController>(RecordController);
-    recordModel = module.get<Model<Record>>(getModelToken('Record'));
+    service = module.get<RecordService>(RecordService);
+
+    jest.clearAllMocks();
   });
 
   it('should create a new record', async () => {
-    const createRecordDto: CreateRecordRequestDTO = {
-      artist: 'Test',
-      album: 'Test Record',
-      price: 100,
-      qty: 10,
+    const dto: CreateRecordRequestDTO = {
+      artist: 'Test Artist',
+      album: 'Test Album',
+      price: 50,
+      qty: 5,
       format: RecordFormat.VINYL,
-      category: RecordCategory.ALTERNATIVE,
+      category: RecordCategory.ROCK,
     };
 
-    const savedRecord = {
-      _id: '1',
-      name: 'Test Record',
-      price: 100,
-      qty: 10,
-    };
+    const created = { id: resultId, ...dto };
+    mockRecordService.create.mockResolvedValue(created);
 
-    jest.spyOn(recordModel, 'create').mockResolvedValue(savedRecord as any);
+    const result = await recordController.create(dto);
 
-    const result = await recordController.create(createRecordDto);
-    expect(result).toEqual(savedRecord);
-    expect(recordModel.create).toHaveBeenCalledWith({
-      artist: 'Test',
-      album: 'Test Record',
-      price: 100,
-      qty: 10,
-      category: RecordCategory.ALTERNATIVE,
-      format: RecordFormat.VINYL,
-    });
+    expect(service.create).toHaveBeenCalledWith(dto);
+    expect(result).toEqual(created);
   });
 
-  it('should return an array of records', async () => {
-    const records = [
-      { _id: '1', name: 'Record 1', price: 100, qty: 10 },
-      { _id: '2', name: 'Record 2', price: 200, qty: 20 },
-    ];
+  it('should update an existing record', async () => {
+    const updateDto: UpdateRecordRequestDTO = {
+      artist: 'Updated Artist',
+    };
 
-    jest.spyOn(recordModel, 'find').mockReturnValue({
-      exec: jest.fn().mockResolvedValue(records),
-    } as any);
+    const updatedRecord = {
+      id: resultId,
+      artist: 'Updated Artist',
+      album: 'Old Album',
+    };
 
-    const result = await recordController.findAll();
-    expect(result).toEqual(records);
-    expect(recordModel.find).toHaveBeenCalled();
+    mockRecordService.fetchByIdAndUpdate.mockResolvedValue(updatedRecord);
+
+    const result = await recordController.update(resultId, updateDto);
+
+    expect(service.fetchByIdAndUpdate).toHaveBeenCalledWith(
+      resultId,
+      updateDto,
+    );
+    expect(result).toEqual(updatedRecord);
+  });
+
+  it('should return paginated record list', async () => {
+    const filter = { page: 1, limit: 10 };
+
+    const mockResponse: RecordListResponseDto = {
+      meta: {
+        total: 2,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+      },
+      data: [
+        { artist: 'A', album: 'A1', price: 10, qty: 1 } as any,
+        { artist: 'B', album: 'B1', price: 20, qty: 2 } as any,
+      ],
+    };
+
+    mockRecordService.findAll.mockResolvedValue(mockResponse);
+
+    const result = await recordController.findAll(filter);
+
+    expect(service.findAll).toHaveBeenCalledWith(filter);
+    expect(result).toEqual(mockResponse);
   });
 });

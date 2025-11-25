@@ -9,16 +9,13 @@ import { CreateOrderDto } from '../dtos/create-order.dto';
 import { Order } from '../schemas/order.schema';
 import { Record } from '../../record/schemas/record.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Model, startSession, Types } from 'mongoose';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
+import { ClientSession, Model, Types } from 'mongoose';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel('Order') private readonly orderModel: Model<Order>,
     @InjectModel('Record') private readonly recordModel: Model<Record>,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
   async createOrder(request: CreateOrderDto): Promise<Order> {
@@ -86,6 +83,12 @@ export class OrdersService {
       if (!order) throw new NotFoundException('Order not found');
       return order;
     } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
       throw new InternalServerErrorException('Failed to fetch order');
     }
   }
